@@ -458,9 +458,28 @@ def render_highlighted_text(results):
     )
 
 # --- Sidebar Navigation ---
+from streamlit_option_menu import option_menu
+
 with st.sidebar:
     st.markdown("## Navigation")
-    page = st.radio("Go to", ["Home", "How It Works", "Scan History", "About Us"], label_visibility="collapsed")
+    
+    # Using streamlit-option-menu for a better look
+    # Note: You need to install streamlit-option-menu first
+    # pip install streamlit-option-menu
+    
+    page = option_menu(
+        menu_title=None,
+        options=["Home", "How It Works", "Scan History", "About Us"],
+        icons=["house", "info-circle", "clock-history", "people"],
+        menu_icon="cast",
+        default_index=0,
+        styles={
+            "container": {"padding": "0!important", "background-color": "transparent"},
+            "icon": {"color": "#8b5cf6", "font-size": "16px"}, 
+            "nav-link": {"font-size": "16px", "text-align": "left", "margin":"0px", "--hover-color": "#2e1065"},
+            "nav-link-selected": {"background-color": "#6d28d9"},
+        }
+    )
     
     st.markdown("---")
     st.markdown("""

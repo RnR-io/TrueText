@@ -7,3 +7,4 @@ numpy
 fpdf
 python-docx
 PyPDF2
+streamlit-option-menu
