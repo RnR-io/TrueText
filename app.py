@@ -339,79 +339,120 @@ def render_highlighted_text(results):
         unsafe_allow_html=True
     )
 
+# --- Sidebar Navigation ---
+with st.sidebar:
+    st.markdown("## Navigation")
+    page = st.radio("Go to", ["Home", "About Us"], label_visibility="collapsed")
+    
+    st.markdown("---")
+    st.markdown("""
+    <div style="text-align: center; color: #94a3b8; font-size: 0.9rem;">
+        <p><strong>Motto:</strong><br>Free access to humanizer</p>
+    </div>
+    """, unsafe_allow_html=True)
+
 # --- Main Layout ---
 
 # Load models
 det_tokenizer, det_model, det_device = load_detection_model()
 hum_tokenizer, hum_model, hum_device = load_humanizer_model()
 
-# Hero Section
-st.markdown("""
-<div class="hero-container">
-    <h1 class="hero-title">Detect AI-Generated Text<br>with Confidence</h1>
-    <p class="hero-subtitle">For educators, editors, and content creators. Ensure authenticity in seconds.</p>
-</div>
-""", unsafe_allow_html=True)
+if page == "Home":
+    # Hero Section
+    st.markdown("""
+    <div class="hero-container">
+        <h1 class="hero-title">Detect AI-Generated Text<br>with Confidence</h1>
+        <p class="hero-subtitle">For educators, editors, and content creators. Ensure authenticity in seconds.</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Main Input Area
-col1, col2 = st.columns([1, 1], gap="large")
+    # Main Input Area
+    col1, col2 = st.columns([1, 1], gap="large")
 
-with col1:
-    st.markdown("### 📄 Paste Text")
-    input_text = st.text_area("Input Text", height=300, label_visibility="collapsed", placeholder="Paste your text here to analyze...")
+    with col1:
+        st.markdown("### 📄 Paste Text")
+        input_text = st.text_area("Input Text", height=300, label_visibility="collapsed", placeholder="Paste your text here to analyze...")
+        
+        btn_col1, btn_col2 = st.columns(2)
+        with btn_col1:
+            detect_btn = st.button("🔍 Analyze Text", use_container_width=True)
+        with btn_col2:
+            humanize_btn = st.button("✨ Humanize", use_container_width=True)
+
+    with col2:
+        if detect_btn and input_text:
+            with st.spinner("🔮 Analyzing patterns..."):
+                score, results = detect_ai_content(input_text, det_tokenizer, det_model, det_device)
+                
+                st.markdown("### 📊 Analysis Results")
+                render_circular_progress(score)
+                
+                st.markdown("### 📝 Detailed Breakdown")
+                render_highlighted_text(results)
+                
+        elif humanize_btn and input_text:
+            with st.spinner("✨ Rewriting content..."):
+                humanized_text = humanize_text(input_text, hum_tokenizer, hum_model, hum_device)
+                
+                st.markdown("### ✨ Humanized Result")
+                st.success("Text successfully rewritten!")
+                st.text_area("Output", value=humanized_text, height=400, label_visibility="collapsed")
+                
+        else:
+            # Default State / Landing Page Content
+            st.markdown("### Why Choose TrueText?")
+            st.markdown("""
+            <div class="feature-grid" style="margin: 0; grid-template-columns: 1fr;">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h4 style="margin: 0 0 0.5rem 0;">Pinpoint Accuracy</h4>
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Leverage state-of-the-art RoBERTa models for precise AI detection.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h4 style="margin: 0 0 0.5rem 0;">Instant Results</h4>
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Get comprehensive analysis and scoring in just a few seconds.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h4 style="margin: 0 0 0.5rem 0;">Privacy First</h4>
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Your data is yours. We never store or share your analyzed content.</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+elif page == "About Us":
+    st.markdown("""
+    <div class="hero-container" style="padding: 3rem 2rem;">
+        <h1 class="hero-title">About Us</h1>
+        <p class="hero-subtitle">Empowering creators with transparent and accessible AI tools.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    btn_col1, btn_col2 = st.columns(2)
-    with btn_col1:
-        detect_btn = st.button("🔍 Analyze Text", use_container_width=True)
-    with btn_col2:
-        humanize_btn = st.button("✨ Humanize", use_container_width=True)
-
-with col2:
-    if detect_btn and input_text:
-        with st.spinner("🔮 Analyzing patterns..."):
-            score, results = detect_ai_content(input_text, det_tokenizer, det_model, det_device)
+    st.markdown("""
+    <div style="max-width: 800px; margin: 0 auto; padding: 2rem;">
+        <div class="result-box">
+            <h2 style="color: var(--accent); margin-bottom: 1.5rem;">Our Mission</h2>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-muted);">
+                At <strong>RnR-io</strong>, we believe that advanced AI technology should be accessible to everyone. 
+                In an era where digital content is increasingly generated by machines, distinguishing between human and AI authorship is crucial for maintaining integrity and authenticity.
+            </p>
+            <p style="font-size: 1.1rem; line-height: 1.8; color: var(--text-muted);">
+                TrueText was built to provide a reliable, free, and easy-to-use solution for students, educators, and content creators.
+            </p>
             
-            st.markdown("### 📊 Analysis Results")
-            render_circular_progress(score)
-            
-            st.markdown("### 📝 Detailed Breakdown")
-            render_highlighted_text(results)
-            
-    elif humanize_btn and input_text:
-        with st.spinner("✨ Rewriting content..."):
-            humanized_text = humanize_text(input_text, hum_tokenizer, hum_model, hum_device)
-            
-            st.markdown("### ✨ Humanized Result")
-            st.success("Text successfully rewritten!")
-            st.text_area("Output", value=humanized_text, height=400, label_visibility="collapsed")
-            
-    else:
-        # Default State / Landing Page Content
-        st.markdown("### Why Choose TrueText?")
-        st.markdown("""
-        <div class="feature-grid" style="margin: 0; grid-template-columns: 1fr;">
-            <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h4 style="margin: 0 0 0.5rem 0;">Pinpoint Accuracy</h4>
-                <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Leverage state-of-the-art RoBERTa models for precise AI detection.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h4 style="margin: 0 0 0.5rem 0;">Instant Results</h4>
-                <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Get comprehensive analysis and scoring in just a few seconds.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">🔒</div>
-                <h4 style="margin: 0 0 0.5rem 0;">Privacy First</h4>
-                <p style="color: #94a3b8; font-size: 0.9rem; margin: 0;">Your data is yours. We never store or share your analyzed content.</p>
+            <div style="margin-top: 3rem; text-align: center; padding: 2rem; background: rgba(139, 92, 246, 0.1); border-radius: 16px; border: 1px solid var(--accent);">
+                <h3 style="margin-bottom: 1rem;">Our Motto</h3>
+                <p style="font-size: 1.5rem; font-weight: 700; color: #fff;">"Free access to humanizer"</p>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
 <div class="custom-footer">
-    <p>TrueText AI Detector &copy; 2024. All rights reserved.</p>
+    <p>TrueText - An <strong>RnR-io</strong> Project &copy; 2024.</p>
     <p style="margin-top: 1rem;">
         <a href="https://github.com/RnR-io/TrueText" target="_blank" style="color: #8b5cf6; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
             <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark-Light-64px.png" width="20" height="20">
