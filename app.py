@@ -212,10 +212,31 @@ st.markdown("""
 </style>
 
 <div class="custom-header">
-    <div class="logo">✨ True<span>Text</span></div>
+    <div class="logo" style="display: flex; align-items: center;">
+        <img src="data:image/png;base64,{logo_base64}" style="height: 40px; margin-right: 10px; border-radius: 8px;">
+        True<span>Text</span>
+    </div>
     <div style="color: var(--text-muted);">v2.0</div>
 </div>
 """, unsafe_allow_html=True)
+
+# Load and encode logo
+import base64
+try:
+    with open("logo.png", "rb") as f:
+        logo_base64 = base64.b64encode(f.read()).decode()
+    # Re-render header with logo
+    st.markdown(f"""
+    <div class="custom-header">
+        <div class="logo" style="display: flex; align-items: center;">
+            <img src="data:image/png;base64,{logo_base64}" style="height: 40px; margin-right: 10px; border-radius: 8px;">
+            True<span>Text</span>
+        </div>
+        <div style="color: var(--text-muted);">v2.0</div>
+    </div>
+    """, unsafe_allow_html=True)
+except:
+    pass
 
 # --- Helper Functions ---
 
