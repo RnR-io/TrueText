@@ -78,17 +78,28 @@ def humanize_text(text, tokenizer, model, device):
     if not text or not tokenizer or not model:
         return ""
     
-    sentences = nltk.sent_tokenize(text)
-    humanized_sentences = []
+    # Split text into paragraphs to preserve structure
+    paragraphs = text.split('\n\n')
+    humanized_paragraphs = []
     
-    for sentence in sentences:
-        batch = tokenizer([sentence], truncation=True, padding='longest', max_length=60, return_tensors="pt").to(device)
-        with torch.no_grad():
-            translated = model.generate(**batch, max_length=60, num_beams=10, num_return_sequences=1, temperature=1.5)
-        tgt_text = tokenizer.batch_decode(translated, skip_special_tokens=True)
-        humanized_sentences.append(tgt_text[0])
+    for paragraph in paragraphs:
+        if not paragraph.strip():
+            humanized_paragraphs.append("")
+            continue
+            
+        sentences = nltk.sent_tokenize(paragraph)
+        humanized_sentences = []
         
-    return " ".join(humanized_sentences)
+        for sentence in sentences:
+            batch = tokenizer([sentence], truncation=True, padding='longest', max_length=60, return_tensors="pt").to(device)
+            with torch.no_grad():
+                translated = model.generate(**batch, max_length=60, num_beams=10, num_return_sequences=1, temperature=1.5)
+            tgt_text = tokenizer.batch_decode(translated, skip_special_tokens=True)
+            humanized_sentences.append(tgt_text[0])
+        
+        humanized_paragraphs.append(" ".join(humanized_sentences))
+        
+    return "\n\n".join(humanized_paragraphs)
 
 # --- UI Components ---
 
