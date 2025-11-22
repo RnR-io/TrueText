@@ -12,7 +12,12 @@ import PyPDF2
 import docx
 
 # --- Configuration & Setup ---
-st.set_page_config(page_title="TrueText - AI Detector", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="TrueText - AI Detector", 
+    layout="wide", 
+    initial_sidebar_state="expanded",
+    page_icon="logo.png"
+)
 
 # Ensure NLTK data is available
 try:
@@ -216,7 +221,12 @@ st.markdown("""
         <img src="data:image/png;base64,{logo_base64}" style="height: 40px; margin-right: 10px; border-radius: 8px;">
         True<span>Text</span>
     </div>
-    <div style="color: var(--text-muted);">v2.0</div>
+    <nav style="display: flex; gap: 2rem; align-items: center;">
+        <a href="#home" style="color: var(--text); text-decoration: none; transition: color 0.3s;">Home</a>
+        <a href="#how-it-works" style="color: var(--text); text-decoration: none; transition: color 0.3s;">How It Works</a>
+        <a href="#history" style="color: var(--text); text-decoration: none; transition: color 0.3s;">History</a>
+        <a href="#about" style="color: var(--text); text-decoration: none; transition: color 0.3s;">About</a>
+    </nav>
 </div>
 """, unsafe_allow_html=True)
 
@@ -225,14 +235,19 @@ import base64
 try:
     with open("logo.png", "rb") as f:
         logo_base64 = base64.b64encode(f.read()).decode()
-    # Re-render header with logo
+    # Re-render header with logo and navigation
     st.markdown(f"""
     <div class="custom-header">
         <div class="logo" style="display: flex; align-items: center;">
             <img src="data:image/png;base64,{logo_base64}" style="height: 40px; margin-right: 10px; border-radius: 8px;">
             True<span>Text</span>
         </div>
-        <div style="color: var(--text-muted);">v2.0</div>
+        <nav style="display: flex; gap: 2rem; align-items: center;">
+            <a href="#home" style="color: var(--text); text-decoration: none; transition: color 0.3s;">Home</a>
+            <a href="#how-it-works" style="color: var(--text); text-decoration: none; transition: color 0.3s;">How It Works</a>
+            <a href="#history" style="color: var(--text); text-decoration: none; transition: color 0.3s;">History</a>
+            <a href="#about" style="color: var(--text); text-decoration: none; transition: color 0.3s;">About</a>
+        </nav>
     </div>
     """, unsafe_allow_html=True)
 except:
@@ -691,7 +706,9 @@ st.markdown("""
     <p>TrueText - An <strong>RnR-io</strong> Project &copy; 2024.</p>
     <p style="margin-top: 1rem;">
         <a href="https://github.com/RnR-io/TrueText" target="_blank" style="color: #8b5cf6; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
-            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark-Light-64px.png" width="20" height="20">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
             View on GitHub
         </a>
     </p>
