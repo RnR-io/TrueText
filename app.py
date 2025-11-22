@@ -185,4 +185,18 @@ with col2:
         st.info("Enter text and choose an action to see results here.")
 
 st.markdown("---")
-st.caption("Powered by RoBERTa & Pegasus | Built with Streamlit")
+st.markdown("---")
+st.markdown(
+    """
+    <div style="text-align: center;">
+        <p>Powered by RoBERTa & Pegasus | Built with Streamlit</p>
+        <p>
+            <a href="https://github.com/RnR-io/TrueText" target="_blank" style="text-decoration: none; color: #666;">
+                <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width="20" height="20" style="vertical-align: middle; margin-right: 5px;">
+                View on GitHub
+            </a>
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
