@@ -274,29 +274,46 @@ def load_history():
     return []
 
 def create_pdf_report(text, score, results):
-    pdf = FPDF()
+    class PDF(FPDF):
+        def header(self):
+            self.set_font('Arial', 'B', 12)
+            self.cell(0, 10, 'TrueText AI Detection Report', 0, 1, 'C')
+
+    def clean_text(text):
+        # Replace common unicode characters that cause issues with latin-1
+        replacements = {
+            '\u2018': "'", '\u2019': "'",  # Smart quotes
+            '\u201c': '"', '\u201d': '"',  # Smart double quotes
+            '\u2013': '-', '\u2014': '-',  # Dashes
+            '\u2026': '...'                # Ellipsis
+        }
+        for k, v in replacements.items():
+            text = text.replace(k, v)
+        # Encode to latin-1, replacing errors with ?
+        return text.encode('latin-1', 'replace').decode('latin-1')
+
+    pdf = PDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     
-    pdf.set_font("Arial", 'B', 16)
-    pdf.cell(200, 10, txt="TrueText AI Detection Report", ln=1, align='C')
-    
     pdf.set_font("Arial", size=10)
-    pdf.cell(200, 10, txt=f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=1, align='C')
+    pdf.cell(0, 10, txt=f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=1, align='C')
     
     pdf.ln(10)
     pdf.set_font("Arial", 'B', 14)
-    pdf.cell(200, 10, txt=f"AI Probability Score: {score:.1f}%", ln=1, align='L')
+    pdf.cell(0, 10, txt=f"AI Probability Score: {score:.1f}%", ln=1, align='L')
     
     pdf.ln(5)
     pdf.set_font("Arial", size=11)
-    pdf.multi_cell(0, 10, txt="Analysis Breakdown (Fake sentences marked with [AI]):")
+    pdf.multi_cell(0, 10, txt=clean_text("Analysis Breakdown (Fake sentences marked with [AI]):"))
     pdf.ln(5)
     
     pdf.set_font("Arial", size=11)
     for sentence, label in results:
         prefix = "[AI] " if label == "Fake" else ""
-        pdf.multi_cell(0, 6, txt=f"{prefix}{sentence}")
+        # Clean the sentence text
+        cleaned_sentence = clean_text(f"{prefix}{sentence}")
+        pdf.multi_cell(0, 6, txt=cleaned_sentence)
         pdf.ln(1)
         
     return pdf.output(dest='S').encode('latin-1')
