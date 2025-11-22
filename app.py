@@ -15,7 +15,7 @@ import docx
 st.set_page_config(
     page_title="TrueText - AI Detector", 
     layout="wide", 
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="collapsed",
     page_icon="logo.png"
 )
 
@@ -220,38 +220,56 @@ st.markdown("""
     <div class="logo" style="display: flex; align-items: center;">
         <img src="data:image/png;base64,{logo_base64}" style="height: 40px; margin-right: 10px; border-radius: 8px;">
         True<span>Text</span>
-    </div>
-    <nav style="display: flex; gap: 2rem; align-items: center;">
-        <a href="#home" style="color: var(--text); text-decoration: none; transition: color 0.3s;">Home</a>
-        <a href="#how-it-works" style="color: var(--text); text-decoration: none; transition: color 0.3s;">How It Works</a>
-        <a href="#history" style="color: var(--text); text-decoration: none; transition: color 0.3s;">History</a>
-        <a href="#about" style="color: var(--text); text-decoration: none; transition: color 0.3s;">About</a>
-    </nav>
-</div>
 """, unsafe_allow_html=True)
 
 # Load and encode logo
 import base64
+
+# Initialize session state for page navigation
+if 'current_page' not in st.session_state:
+    st.session_state.current_page = "Home"
+
 try:
     with open("logo.png", "rb") as f:
         logo_base64 = base64.b64encode(f.read()).decode()
-    # Re-render header with logo and navigation
-    st.markdown(f"""
-    <div class="custom-header">
-        <div class="logo" style="display: flex; align-items: center;">
-            <img src="data:image/png;base64,{logo_base64}" style="height: 40px; margin-right: 10px; border-radius: 8px;">
-            True<span>Text</span>
-        </div>
-        <nav style="display: flex; gap: 2rem; align-items: center;">
-            <a href="#home" style="color: var(--text); text-decoration: none; transition: color 0.3s;">Home</a>
-            <a href="#how-it-works" style="color: var(--text); text-decoration: none; transition: color 0.3s;">How It Works</a>
-            <a href="#history" style="color: var(--text); text-decoration: none; transition: color 0.3s;">History</a>
-            <a href="#about" style="color: var(--text); text-decoration: none; transition: color 0.3s;">About</a>
-        </nav>
-    </div>
-    """, unsafe_allow_html=True)
 except:
-    pass
+    logo_base64 = ""
+
+# Header with logo and navigation
+header_col1, header_col2 = st.columns([1, 3])
+
+
+with header_col1:
+    if logo_base64:
+        st.markdown(f"""
+        <div style="display: flex; align-items: center; padding: 1rem 0;">
+            <img src="data:image/png;base64,{logo_base64}" style="height: 40px; margin-right: 10px; border-radius: 8px;">
+            <span style="font-size: 1.5rem; font-weight: 700;">True<span style="color: #8b5cf6;">Text</span></span>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("### ✨ True**Text**")
+
+with header_col2:
+    nav_cols = st.columns([1, 1, 1, 1, 3])
+    with nav_cols[0]:
+        if st.button("🏠 Home", key="nav_home", use_container_width=True):
+            st.session_state.current_page = "Home"
+            st.rerun()
+    with nav_cols[1]:
+        if st.button("💡 How It Works", key="nav_how", use_container_width=True):
+            st.session_state.current_page = "How It Works"
+            st.rerun()
+    with nav_cols[2]:
+        if st.button("🕐 History", key="nav_history", use_container_width=True):
+            st.session_state.current_page = "Scan History"
+            st.rerun()
+    with nav_cols[3]:
+        if st.button("👥 About", key="nav_about", use_container_width=True):
+            st.session_state.current_page = "About Us"
+            st.rerun()
+
+st.markdown("---")
 
 # --- Helper Functions ---
 
@@ -493,38 +511,10 @@ def render_highlighted_text(results):
         unsafe_allow_html=True
     )
 
-# --- Sidebar Navigation ---
-from streamlit_option_menu import option_menu
-
-with st.sidebar:
-    st.markdown("## Navigation")
-    
-    # Using streamlit-option-menu for a better look
-    # Note: You need to install streamlit-option-menu first
-    # pip install streamlit-option-menu
-    
-    page = option_menu(
-        menu_title=None,
-        options=["Home", "How It Works", "Scan History", "About Us"],
-        icons=["house", "info-circle", "clock-history", "people"],
-        menu_icon="cast",
-        default_index=0,
-        styles={
-            "container": {"padding": "0!important", "background-color": "transparent"},
-            "icon": {"color": "#8b5cf6", "font-size": "16px"}, 
-            "nav-link": {"font-size": "16px", "text-align": "left", "margin":"0px", "--hover-color": "#2e1065"},
-            "nav-link-selected": {"background-color": "#6d28d9"},
-        }
-    )
-    
-    st.markdown("---")
-    st.markdown("""
-    <div style="text-align: center; color: #94a3b8; font-size: 0.9rem;">
-        <p><strong>Motto:</strong><br>Free access to humanizer</p>
-    </div>
-    """, unsafe_allow_html=True)
-
 # --- Main Layout ---
+
+# Get current page from session state
+page = st.session_state.current_page
 
 # Load models
 det_tokenizer, det_model, det_device = load_detection_model()
