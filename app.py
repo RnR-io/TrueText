@@ -216,10 +216,6 @@ st.markdown("""
     }
 </style>
 
-<div class="custom-header">
-    <div class="logo" style="display: flex; align-items: center;">
-        <img src="data:image/png;base64,{logo_base64}" style="height: 40px; margin-right: 10px; border-radius: 8px;">
-        True<span>Text</span>
 """, unsafe_allow_html=True)
 
 # Load and encode logo
