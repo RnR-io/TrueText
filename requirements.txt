@@ -1,0 +1,6 @@
+streamlit
+transformers
+torch
+nltk
+sentencepiece
+numpy
