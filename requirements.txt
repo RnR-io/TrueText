@@ -4,3 +4,6 @@ torch
 nltk
 sentencepiece
 numpy
+fpdf
+python-docx
+PyPDF2

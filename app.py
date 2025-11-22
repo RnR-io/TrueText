@@ -3,9 +3,16 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, PegasusForConditionalGeneration, PegasusTokenizer
 import nltk
 import numpy as np
+import json
+import os
+from datetime import datetime
+from fpdf import FPDF
+import io
+import PyPDF2
+import docx
 
 # --- Configuration & Setup ---
-st.set_page_config(page_title="TrueText - AI Detector", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="TrueText - AI Detector", layout="wide", initial_sidebar_state="expanded")
 
 # Ensure NLTK data is available
 try:
@@ -130,11 +137,6 @@ st.markdown("""
         box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
     }
     
-    .secondary-btn button {
-        background: transparent !important;
-        border: 1px solid var(--accent) !important;
-    }
-
     /* Feature Cards */
     .feature-grid {
         display: grid;
@@ -192,13 +194,112 @@ st.markdown("""
         border-top: 1px solid rgba(255,255,255,0.05);
         margin-top: 4rem;
     }
+    
+    /* Steps */
+    .step-container {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+    }
+    .step-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        background: var(--surface);
+        padding: 10px;
+        border-radius: 50%;
+        border: 1px solid var(--accent);
+    }
 </style>
 
 <div class="custom-header">
     <div class="logo">✨ True<span>Text</span></div>
-    <div style="color: var(--text-muted);">v1.0</div>
+    <div style="color: var(--text-muted);">v2.0</div>
 </div>
 """, unsafe_allow_html=True)
+
+# --- Helper Functions ---
+
+def extract_text_from_file(uploaded_file):
+    if uploaded_file is None:
+        return ""
+    
+    try:
+        if uploaded_file.type == "application/pdf":
+            pdf_reader = PyPDF2.PdfReader(uploaded_file)
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text()
+            return text
+        elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            doc = docx.Document(uploaded_file)
+            text = "\n".join([para.text for para in doc.paragraphs])
+            return text
+        else: # txt
+            return str(uploaded_file.read(), "utf-8")
+    except Exception as e:
+        st.error(f"Error reading file: {e}")
+        return ""
+
+def save_to_history(text, score, label):
+    history_file = "history.json"
+    entry = {
+        "id": datetime.now().strftime("%Y%m%d%H%M%S"),
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "text_snippet": text[:100] + "..." if len(text) > 100 else text,
+        "score": score,
+        "label": label
+    }
+    
+    if os.path.exists(history_file):
+        with open(history_file, "r") as f:
+            try:
+                history = json.load(f)
+            except:
+                history = []
+    else:
+        history = []
+    
+    history.insert(0, entry) # Add to beginning
+    with open(history_file, "w") as f:
+        json.dump(history, f)
+
+def load_history():
+    history_file = "history.json"
+    if os.path.exists(history_file):
+        with open(history_file, "r") as f:
+            try:
+                return json.load(f)
+            except:
+                return []
+    return []
+
+def create_pdf_report(text, score, results):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+    
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(200, 10, txt="TrueText AI Detection Report", ln=1, align='C')
+    
+    pdf.set_font("Arial", size=10)
+    pdf.cell(200, 10, txt=f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}", ln=1, align='C')
+    
+    pdf.ln(10)
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(200, 10, txt=f"AI Probability Score: {score:.1f}%", ln=1, align='L')
+    
+    pdf.ln(5)
+    pdf.set_font("Arial", size=11)
+    pdf.multi_cell(0, 10, txt="Analysis Breakdown (Fake sentences marked with [AI]):")
+    pdf.ln(5)
+    
+    pdf.set_font("Arial", size=11)
+    for sentence, label in results:
+        prefix = "[AI] " if label == "Fake" else ""
+        pdf.multi_cell(0, 6, txt=f"{prefix}{sentence}")
+        pdf.ln(1)
+        
+    return pdf.output(dest='S').encode('latin-1')
 
 # --- Model Loading (Cached) ---
 @st.cache_resource
@@ -342,7 +443,7 @@ def render_highlighted_text(results):
 # --- Sidebar Navigation ---
 with st.sidebar:
     st.markdown("## Navigation")
-    page = st.radio("Go to", ["Home", "About Us"], label_visibility="collapsed")
+    page = st.radio("Go to", ["Home", "How It Works", "Scan History", "About Us"], label_visibility="collapsed")
     
     st.markdown("---")
     st.markdown("""
@@ -370,8 +471,19 @@ if page == "Home":
     col1, col2 = st.columns([1, 1], gap="large")
 
     with col1:
-        st.markdown("### 📄 Paste Text")
-        input_text = st.text_area("Input Text", height=300, label_visibility="collapsed", placeholder="Paste your text here to analyze...")
+        st.markdown("### 📄 Paste Text or Upload File")
+        
+        tab1, tab2 = st.tabs(["Paste Text", "Upload File"])
+        
+        with tab1:
+            input_text = st.text_area("Input Text", height=300, label_visibility="collapsed", placeholder="Paste your text here to analyze...")
+        
+        with tab2:
+            uploaded_file = st.file_uploader("Choose a file", type=['txt', 'pdf', 'docx'])
+            if uploaded_file is not None:
+                input_text = extract_text_from_file(uploaded_file)
+                st.success("File loaded successfully!")
+                st.text_area("Preview", value=input_text[:500] + "...", height=150, disabled=True)
         
         btn_col1, btn_col2 = st.columns(2)
         with btn_col1:
@@ -383,12 +495,24 @@ if page == "Home":
         if detect_btn and input_text:
             with st.spinner("🔮 Analyzing patterns..."):
                 score, results = detect_ai_content(input_text, det_tokenizer, det_model, det_device)
+                label = "AI Content" if score > 50 else "Likely Human"
+                save_to_history(input_text, score, label)
                 
                 st.markdown("### 📊 Analysis Results")
                 render_circular_progress(score)
                 
                 st.markdown("### 📝 Detailed Breakdown")
                 render_highlighted_text(results)
+                
+                # PDF Export
+                pdf_bytes = create_pdf_report(input_text, score, results)
+                st.download_button(
+                    label="📥 Export PDF Report",
+                    data=pdf_bytes,
+                    file_name="truetext_report.pdf",
+                    mime="application/pdf",
+                    use_container_width=True
+                )
                 
         elif humanize_btn and input_text:
             with st.spinner("✨ Rewriting content..."):
@@ -420,6 +544,61 @@ if page == "Home":
                 </div>
             </div>
             """, unsafe_allow_html=True)
+
+elif page == "How It Works":
+    st.markdown("""
+    <div class="hero-container" style="padding: 3rem 2rem;">
+        <h1 class="hero-title">How It Works</h1>
+        <p class="hero-subtitle">Simple steps to ensure content authenticity.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div style="max-width: 800px; margin: 0 auto;">
+        <div class="result-box">
+            <div class="step-container">
+                <div class="step-icon">📄</div>
+                <div>
+                    <h3>1. Paste Your Text</h3>
+                    <p style="color: var(--text-muted);">Simply input the text you want to check into the analysis field or upload a file (PDF, DOCX, TXT).</p>
+                </div>
+            </div>
+            <div class="step-container">
+                <div class="step-icon">🔍</div>
+                <div>
+                    <h3>2. Analyze Content</h3>
+                    <p style="color: var(--text-muted);">Our powerful AI engine scans the text for digital signatures and linguistic patterns.</p>
+                </div>
+            </div>
+            <div class="step-container">
+                <div class="step-icon">📊</div>
+                <div>
+                    <h3>3. Get Results</h3>
+                    <p style="color: var(--text-muted);">Receive a clear probability score, highlighted text analysis, and exportable reports.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+elif page == "Scan History":
+    st.markdown("""
+    <div class="hero-container" style="padding: 3rem 2rem;">
+        <h1 class="hero-title">Scan History</h1>
+        <p class="hero-subtitle">View your recent analysis results.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    history = load_history()
+    
+    if not history:
+        st.info("No scan history found. Run an analysis to see it here!")
+    else:
+        for item in history:
+            with st.expander(f"{item['timestamp']} - {item['label']} ({item['score']:.1f}%)"):
+                st.write(f"**Snippet:** {item['text_snippet']}")
+                st.write(f"**Score:** {item['score']:.1f}%")
+                st.write(f"**Verdict:** {item['label']}")
 
 elif page == "About Us":
     st.markdown("""
