@@ -547,8 +547,7 @@ def render_highlighted_text(results):
 page = st.session_state.current_page
 
 # Load models
-det_tokenizer, det_model, det_device = load_detection_model()
-hum_tokenizer, hum_model, hum_device = load_humanizer_model()
+# Models are now loaded lazily within the respective sections to save resources
 
 if page == "Home":
     # Hero Section
@@ -585,7 +584,8 @@ if page == "Home":
 
     with col2:
         if detect_btn and input_text:
-            with st.spinner("🔮 Analyzing patterns..."):
+            with st.spinner("🔮 Loading model and analyzing..."):
+                det_tokenizer, det_model, det_device = load_detection_model()
                 score, results = detect_ai_content(input_text, det_tokenizer, det_model, det_device)
                 label = "AI Content" if score > 50 else "Likely Human"
                 save_to_history(input_text, score, label)
@@ -607,7 +607,8 @@ if page == "Home":
                 )
                 
         elif humanize_btn and input_text:
-            with st.spinner("✨ Rewriting content..."):
+            with st.spinner("✨ Loading humanizer model (this may take a moment)..."):
+                hum_tokenizer, hum_model, hum_device = load_humanizer_model()
                 humanized_text = humanize_text(input_text, hum_tokenizer, hum_model, hum_device)
                 
                 st.markdown("### ✨ Humanized Result")
