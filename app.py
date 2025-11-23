@@ -214,6 +214,40 @@ st.markdown("""
         border-radius: 50%;
         border: 1px solid var(--accent);
     }
+
+    /* Navigation Buttons - Text Style */
+    .st-key-nav_home button,
+    .st-key-nav_how button,
+    .st-key-nav_history button,
+    .st-key-nav_about button {
+        background: transparent !important;
+        border: none !important;
+        color: var(--text-muted) !important;
+        box-shadow: none !important;
+        font-weight: 500 !important;
+        height: auto !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+        white-space: nowrap !important;
+    }
+
+    .st-key-nav_home button:hover,
+    .st-key-nav_how button:hover,
+    .st-key-nav_history button:hover,
+    .st-key-nav_about button:hover {
+        color: var(--accent) !important;
+        background: transparent !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    
+    .st-key-nav_home button:focus:not(:active),
+    .st-key-nav_how button:focus:not(:active),
+    .st-key-nav_history button:focus:not(:active),
+    .st-key-nav_about button:focus:not(:active) {
+        border-color: transparent !important;
+        color: var(--accent) !important;
+    }
 </style>
 
 """, unsafe_allow_html=True)
@@ -246,24 +280,24 @@ with header_col1:
     else:
         st.markdown("### ✨ True**Text**")
 
-with header_col2:
-    nav_cols = st.columns([1, 1, 1, 1, 3])
-    with nav_cols[0]:
-        if st.button("🏠 Home", key="nav_home", use_container_width=True):
-            st.session_state.current_page = "Home"
-            st.rerun()
-    with nav_cols[1]:
-        if st.button("💡 How It Works", key="nav_how", use_container_width=True):
-            st.session_state.current_page = "How It Works"
-            st.rerun()
-    with nav_cols[2]:
-        if st.button("🕐 History", key="nav_history", use_container_width=True):
-            st.session_state.current_page = "Scan History"
-            st.rerun()
-    with nav_cols[3]:
-        if st.button("👥 About", key="nav_about", use_container_width=True):
-            st.session_state.current_page = "About Us"
-            st.rerun()
+    with header_col2:
+        nav_cols = st.columns([1, 1.5, 1, 1, 2.5])
+        with nav_cols[0]:
+            if st.button("🏠 Home", key="nav_home", use_container_width=True):
+                st.session_state.current_page = "Home"
+                st.rerun()
+        with nav_cols[1]:
+            if st.button("💡 How It Works", key="nav_how", use_container_width=True):
+                st.session_state.current_page = "How It Works"
+                st.rerun()
+        with nav_cols[2]:
+            if st.button("🕐 History", key="nav_history", use_container_width=True):
+                st.session_state.current_page = "Scan History"
+                st.rerun()
+        with nav_cols[3]:
+            if st.button("👥 About", key="nav_about", use_container_width=True):
+                st.session_state.current_page = "About Us"
+                st.rerun()
 
 st.markdown("---")
 
