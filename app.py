@@ -458,15 +458,15 @@ def humanize_text(text, tokenizer, model, device):
     if not text or not tokenizer or not model:
         return ""
     
-    paragraphs = text.split('\n\n')
-    humanized_paragraphs = []
+    lines = text.split('\n')
+    humanized_lines = []
     
-    for paragraph in paragraphs:
-        if not paragraph.strip():
-            humanized_paragraphs.append("")
+    for line in lines:
+        if not line.strip():
+            humanized_lines.append("")
             continue
             
-        sentences = nltk.sent_tokenize(paragraph)
+        sentences = nltk.sent_tokenize(line)
         humanized_sentences = []
         
         for sentence in sentences:
@@ -476,9 +476,9 @@ def humanize_text(text, tokenizer, model, device):
             tgt_text = tokenizer.batch_decode(translated, skip_special_tokens=True)
             humanized_sentences.append(tgt_text[0])
         
-        humanized_paragraphs.append(" ".join(humanized_sentences))
+        humanized_lines.append(" ".join(humanized_sentences))
         
-    return "\n\n".join(humanized_paragraphs)
+    return "\n".join(humanized_lines)
 
 # --- UI Components ---
 def render_circular_progress(percentage):
